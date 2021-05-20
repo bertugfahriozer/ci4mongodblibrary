@@ -2,6 +2,7 @@
   "name": "bertugfahriozer/ci4mongodblibrary",
   "description": "Codeigniter 4 MongoDB library & Common Model",
   "minimum-stability": "dev",
+  "type": "library",
   "license": "MIT",
   "authors": [
     {
