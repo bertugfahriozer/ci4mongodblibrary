@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Libraries;
+namespace ci4mongodblibrary\Libraries;
 
-use Config\MongoConfig;
+use ci4mongodblibrary\Config\MongoConfig;
 use MongoDB\BSON\Regex;
 use MongoDB\Client as client;
 
