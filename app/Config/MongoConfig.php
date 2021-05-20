@@ -1,4 +1,4 @@
-<?php namespace ci4mongodblibrary\App\Config;
+<?php namespace ci4mongodblibrary\Config;
 
 use CodeIgniter\Config\BaseConfig;
 
