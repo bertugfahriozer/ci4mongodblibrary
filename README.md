@@ -26,3 +26,5 @@ class MongoConfig extends BaseConfig
 if do you want manual install you can follow these steps.
 
 **You can move files in your Codeigniter 4 project and you must change namespaces => <br><br> app/Libraries/Mongo.php,<br>app/Config/MongoConfig.php,<br>app/Models/CommonModel.php.**
+
+<a href="https://www.bynogame.com/destekle/bertugfahriozer-wwwyoutubecomchannelUCnw4Gyax5OAx6d4DtiNh_gw"><img src="https://bertugfahriozer.com/assets/images/gallery/BMC-logowordmark-Black.jpg" height="70"></a>
