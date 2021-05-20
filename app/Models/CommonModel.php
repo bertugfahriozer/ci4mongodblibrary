@@ -1,8 +1,8 @@
 <?php
 
-namespace ci4mongodblibrary\Models;
+namespace ci4mongodblibrary\App\Models;
 
-use ci4mongodblibrary\Libraries\Mongo;
+use ci4mongodblibrary\App\Libraries\Mongo;
 use CodeIgniter\Model;
 
 class CommonModel extends Model
