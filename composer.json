@@ -1,0 +1,28 @@
+{
+  "name": "bertugfahriozer/ci4-mongodb-library",
+  "description": "Codeigniter 4 MongoDB library & Common Model",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Bertuğ Fahri ÖZER",
+      "email": "bertugfahriozer@gmail.com",
+      "homepage": "https://bertugfahriozer.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^7.3||^8.0",
+    "mongodb/mongodb": "^1.8"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app",
+      "Config\\": "app/Config"
+    }
+  },
+  "support": {
+    "forum": "https://bertugfahriozer.com/",
+    "source": "https://github.com/bertugfahriozer/ci4-mongodb-library"
+  }
+}
