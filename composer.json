@@ -1,5 +1,5 @@
 {
-  "name": "bertugfahriozer/ci4-mongodb-library",
+  "name": "bertugfahriozer/ci4mongodblibrary",
   "description": "Codeigniter 4 MongoDB library & Common Model",
   "minimum-stability": "dev",
   "license": "MIT",
@@ -17,8 +17,8 @@
   },
   "autoload": {
     "psr-4": {
-      "App\\": "ci4-mongodb-library/app",
-      "Config\\": "ci4-mongodb-library/app/Config"
+      "App\\": "app",
+      "Config\\": "app/Config"
     }
   },
   "support": {
