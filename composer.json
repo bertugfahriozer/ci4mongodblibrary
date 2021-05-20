@@ -14,7 +14,7 @@
   ],
   "require": {
     "php": "^7.3||^8.0",
-    "mongodb/mongodb": "^1.8"
+    "mongodb/mongodb": "^1.8",
   },
   "autoload": {
     "psr-4": {
@@ -24,6 +24,6 @@
   },
   "support": {
     "forum": "https://bertugfahriozer.com/",
-    "source": "https://github.com/bertugfahriozer/ci4-mongodb-library"
+    "source": "https://github.com/bertugfahriozer/ci4mongodblibrary"
   }
 }
