@@ -26,7 +26,7 @@ class Mongo
 
     function __construct()
     {
-        $this->mongoConnectionInfos = new SimpleConfig();
+        $this->mongoConnectionInfos = new MongoConfig();
         $this->m = new client("mongodb://{$this->mongoConnectionInfos->hostname}:{$this->mongoConnectionInfos->port}/{$this->mongoConnectionInfos->db}",
             ["authMechanism" => "SCRAM-SHA-1",
                 'username' => $this->mongoConnectionInfos->userName,
