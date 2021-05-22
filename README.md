@@ -8,6 +8,8 @@ You must have Mongo Driver and Composer. Follow these links for installation:
 </ul>
 
 You must create a config file. When you create file, delete spaces for php tag. (app/Config/MongoConfig.php)
+
+<code>composer require bertugfahriozer/ci4mongodblibrary</code>
 <pre>
 < ? php namespace App\Config;
 
