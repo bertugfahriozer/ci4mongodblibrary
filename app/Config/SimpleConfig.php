@@ -1,8 +1,8 @@
-<?php namespace App\Config;
+<?php namespace Config;
 
 use CodeIgniter\Config\BaseConfig;
 
-class MongoConfig extends BaseConfig
+class SimpleConfig extends BaseConfig
 {
     public $db = ""; //your database
     public $hostname = '127.0.0.1'; //if you use remote server you should change host address

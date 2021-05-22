@@ -1,6 +1,6 @@
 <?php namespace ci4mongodblibrary\Libraries;
 
-use \App\Config\MongoConfig;
+use \Config\SimpleConfig;
 use MongoDB\BSON\Regex;
 use MongoDB\Client as client;
 
@@ -26,7 +26,7 @@ class Mongo
 
     function __construct()
     {
-        $this->mongoConnectionInfos = new MongoConfig();
+        $this->mongoConnectionInfos = new SimpleConfig();
         $this->m = new client("mongodb://{$this->mongoConnectionInfos->hostname}:{$this->mongoConnectionInfos->port}/{$this->mongoConnectionInfos->db}",
             ["authMechanism" => "SCRAM-SHA-1",
                 'username' => $this->mongoConnectionInfos->userName,
