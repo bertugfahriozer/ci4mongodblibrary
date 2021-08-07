@@ -146,7 +146,7 @@ class Mongo
         return $this;
     }
 
-    public function where_in($field = "", $in = array())
+    public function where_in(?string $field, $in = array())
     {
         if (empty($field)) {
             show_error("Mongo field is require to perform where in query.", 500);
@@ -169,7 +169,7 @@ class Mongo
      *
      * @usage : $this->mongo->where_in_all('foo', array('bar', 'zoo', 'blah'))->otherFunction('foobar');
      */
-    public function where_in_all($field = "", $in = array())
+    public function where_in_all(?string $field, $in = array())
     {
         if (empty($field)) {
             show_error("Mongo field is require to perform where all in query.", 500);
@@ -192,7 +192,7 @@ class Mongo
      *
      * @usage : $this->mongo->where_not_in('foo', array('bar', 'zoo', 'blah'))->otherFunction('foobar');
      */
-    public function where_not_in($field = "", $in = array())
+    public function where_not_in(?string $field, $in = array())
     {
         if (empty($field)) {
             show_error("Mongo field is require to perform where not in query.", 500);
@@ -215,7 +215,7 @@ class Mongo
      *
      * @usage : $this->mongo->where_gt('foo', 20);
      */
-    public function where_gt($field = "", $x)
+    public function where_gt(?string $field, $x)
     {
         if (!isset($field)) {
             log_message('warning', "Mongo field is require to perform greater then query.");
@@ -237,7 +237,7 @@ class Mongo
      *
      * @usage : $this->mongo->where_gte('foo', 20);
      */
-    public function where_gte($field = "", $x)
+    public function where_gte(?string $field, $x)
     {
         if (!isset($field)) {
             log_message('warning', "Mongo field is require to perform greater then or equal query.");
@@ -259,7 +259,7 @@ class Mongo
      *
      * @usage : $this->m->where_lt('foo', 20);
      */
-    public function where_lt($field = "", $x)
+    public function where_lt(?string $field, $x)
     {
         if (!isset($field)) {
             log_message('warning', "Mongo field is require to perform less then query.");
@@ -281,7 +281,7 @@ class Mongo
      *
      * @usage : $this->m->where_lte('foo', 20);
      */
-    public function where_lte($field = "", $x)
+    public function where_lte(?string $field, $x)
     {
         if (!isset($field)) {
             log_message('watning', "Mongo field is require to perform less then or equal to query.");
@@ -303,7 +303,7 @@ class Mongo
      *
      * @usage : $this->m->where_between('foo', 20, 30);
      */
-    public function where_between($field = "", $x, $y)
+    public function where_between(?string $field, $x, $y)
     {
         if (!isset($field)) {
             log_message('warning', "Mongo field is require to perform greater then or equal to query.");
@@ -329,7 +329,7 @@ class Mongo
      *
      * @usage : $this->m->where_between_ne('foo', 20, 30);
      */
-    public function where_between_ne($field = "", $x, $y)
+    public function where_between_ne($field, $x, $y)
     {
         if (!isset($field)) {
             log_message('warning', "Mongo field is require to perform between and but not equal to query.");
@@ -355,7 +355,7 @@ class Mongo
      *
      * @usage : $this->m->where_ne('foo', 1)->get('foobar');
      */
-    public function where_ne($field = '', $x)
+    public function where_ne($field, $x)
     {
         if (!isset($field)) {
             log_message('warning', "Mongo field is require to perform Where not equal to query.");
@@ -397,7 +397,7 @@ class Mongo
      *
      * @usage : $this->m->like('foo', 'bar', 'im', FALSE, TRUE);
      */
-    public function like($field = "", $value = "", $flags = "i", $enable_start_wildcard = TRUE, $enable_end_wildcard = TRUE)
+    public function like(?string $field, $value = "", $flags = "i", $enable_start_wildcard = TRUE, $enable_end_wildcard = TRUE)
     {
         if (empty($field)) {
             log_message('warning', "Mongo field is require to perform like query.");
@@ -550,7 +550,7 @@ class Mongo
      *
      * @usage: $this->m->pull('comments', array('comment_id'=>123))->update('blog_posts');
      */
-    public function pull($field = "", $value = array())
+    public function pull(?string $field, $value = array())
     {
         $this->_u('$pull');
         $this->updates['$pull'] = array($field => $value);
@@ -670,7 +670,7 @@ class Mongo
      *
      * @usage: $this->m->distinct('collection', 'field');
      */
-    public function distinct($collection = "", $field = "")
+    public function distinct(?string $collection, ?string $field)
     {
         if (empty($collection)) {
             show_error("No Mongo collection selected for update", 500);
@@ -898,3 +898,4 @@ class Mongo
         return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->deleteMany($this->wheres, $this->options)->isAcknowledged();
     }
 }
+

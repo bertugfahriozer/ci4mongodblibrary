@@ -43,6 +43,9 @@ class CommonModel extends Model
         return $this->m->options(['limit' => 1])->where($credentials)->count($collection);
     }
 
+    public function updateMany(string $collection, array $where, array $set, array $options = []){
+        return $this->m->options($options)->where($where)->set($set)->updateMany($collection);
+    }
     public function updateOne(string $collection, array $where, array $set, array $options = [])
     {
         return $this->m->options($options)->where($where)->set($set)->updateOne($collection);
@@ -58,3 +61,4 @@ class CommonModel extends Model
         return $this->m->count($collection);
     }
 }
+
