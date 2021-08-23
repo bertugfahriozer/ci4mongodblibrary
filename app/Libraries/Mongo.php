@@ -878,14 +878,14 @@ class Mongo
      * ['upsert' => true]
      * );
      */
-    public function updateOne($collection, $options = [])
+    public function updateOne($collection)
     {
-        return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->updateOne($this->wheres, $this->updates, $options)->isAcknowledged();
+        return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->updateOne($this->wheres, $this->updates, $this->options)->isAcknowledged();
     }
 
-    public function updateMany($collection, $where = [])
+    public function updateMany($collection)
     {
-        return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->updateMany($where, $this->updates, $this->options)->isAcknowledged();
+        return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->updateMany($this->where, $this->updates, $this->options)->isAcknowledged();
     }
 
     public function deleteOne($collection)
