@@ -27,10 +27,17 @@ class Mongo
     function __construct()
     {
         $this->mongoConnectionInfos = new MongoConfig();
-        $this->m = new client("mongodb://{$this->mongoConnectionInfos->hostname}:{$this->mongoConnectionInfos->port}/{$this->mongoConnectionInfos->db}",
-            ["authMechanism" => "SCRAM-SHA-1",
-                'username' => $this->mongoConnectionInfos->userName,
-                'password' => $this->mongoConnectionInfos->password]);
+        $option=[$this->mongoConnectionInfos->authMechanism,
+            'username' => $this->mongoConnectionInfos->userName,
+            'password' => $this->mongoConnectionInfos->password];
+        if(!empty($this->mongoConnectionInfos->srv))
+        {
+            $this->m = new client(this->mongoConnectionInfos->srv."://{$this->mongoConnectionInfos->userName}:{$this->mongoConnectionInfos->password}@{$this->mongoConnectionInfos->hostname}/{$this->mongoConnectionInfos->db}",[],['ca_file' => '/usr/local/etc/openssl/cert.pem']);
+        }
+        else{
+            $this->m = new client("mongodb://{$this->mongoConnectionInfos->hostname}:{$this->mongoConnectionInfos->port}/{$this->mongoConnectionInfos->db}",
+                $option);
+        }
     }
 
     /**
