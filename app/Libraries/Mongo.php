@@ -3,6 +3,7 @@
 use \Config\MongoConfig;
 use MongoDB\BSON\Regex;
 use MongoDB\Client as client;
+use MongoCollection;
 
 class Mongo
 {
@@ -10,33 +11,29 @@ class Mongo
     private $selects = array();
     private $updates = array();
     private $wheres = array();
-    private $offset = 0;//TODO: fix it
+    private $offset = 0;
     private $sorts = array();
-
-    /** Usage
-     * $options = array();
-     * $options['projection'] = $this->selects;
-     * $options['sort'] = $this->sorts;
-     * $options['skip'] = (int)$this->offset;
-     * $options['limit'] = (int)1;
-     * $options['readConcern'] = $read_concern;
-     * */
+    private $limit = 0;
     private $options = array();
     private $mongoConnectionInfos;
+    private $dbInfo;
 
-    function __construct()
+    function __construct($dbInfo = 'default')
     {
-        $this->mongoConnectionInfos = new MongoConfig();
-        $option=[$this->mongoConnectionInfos->authMechanism,
-            'username' => $this->mongoConnectionInfos->userName,
-            'password' => $this->mongoConnectionInfos->password];
-        if(!empty($this->mongoConnectionInfos->srv))
-        {
-            $this->m = new client(this->mongoConnectionInfos->srv."://{$this->mongoConnectionInfos->userName}:{$this->mongoConnectionInfos->password}@{$this->mongoConnectionInfos->hostname}/{$this->mongoConnectionInfos->db}",[],['ca_file' => '/usr/local/etc/openssl/cert.pem']);
-        }
-        else{
-            $this->m = new client("mongodb://{$this->mongoConnectionInfos->hostname}:{$this->mongoConnectionInfos->port}/{$this->mongoConnectionInfos->db}",
-                $option);
+        try {
+            $this->dbInfo=$dbInfo;
+            $this->mongoConnectionInfos = new MongoConfig();
+            $this->m = new client($this->mongoConnectionInfos->dbInfo[$dbInfo]->srv . "://{$this->mongoConnectionInfos->dbInfo[$dbInfo]->hostname}:{$this->mongoConnectionInfos->dbInfo[$dbInfo]->port}/{$this->mongoConnectionInfos->dbInfo[$dbInfo]->db}",
+                [$this->mongoConnectionInfos->dbInfo[$dbInfo]->authMechanism,
+                    'username' => $this->mongoConnectionInfos->dbInfo[$dbInfo]->userName,
+                    'password' => $this->mongoConnectionInfos->dbInfo[$dbInfo]->password,
+                    'journal'=>$this->mongoConnectionInfos->dbInfo[$dbInfo]->journal,
+                    'w'=>$this->mongoConnectionInfos->dbInfo[$dbInfo]->write_concerns,
+                    'readConcern'=>$this->mongoConnectionInfos->dbInfo[$dbInfo]->read_concern,
+                    'readPreference'=>$this->mongoConnectionInfos->dbInfo[$dbInfo]->read_preference,
+                ], $this->mongoConnectionInfos->dbInfo[$dbInfo]->ca_file);
+        } catch (\CodeIgniter\UnknownFileException $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -99,7 +96,7 @@ class Mongo
      * be an associative array with the field as the key and the value as the search
      * criteria.
      *
-     * @usage : $this->mongo->where(array('foo' => 'bar'))->otherFunction('foobar');
+     * @usage : $this->m->where(array('foo' => 'bar'))->otherFunction('foobar');
      */
     public function where($wheres, $value = null)
     {
@@ -120,7 +117,7 @@ class Mongo
      *
      * Get the documents where the value of a $field may be something else
      *
-     * @usage : $this->mongo->where_or(array('foo'=>'bar', 'bar'=>'foo'))->otherFunction('foobar');
+     * @usage : $this->m->where_or(array('foo'=>'bar', 'bar'=>'foo'))->otherFunction('foobar');
      */
     public function where_or($wheres = array())
     {
@@ -133,7 +130,7 @@ class Mongo
             }
             return ($this);
         } else {
-            log_message('warning', "Where value should be an array.(where_or)");
+            throw new \Exception("Where value should be an array.(where_or)");
         }
     }
 
@@ -146,8 +143,10 @@ class Mongo
             }
             $this->_clear();
             $this->options = $ops;
+            if ($this->offset > 0)
+                $option['skip'] = $this->offset;
         } else {
-            log_message('warning', "Where value should be an array.(options)");
+            throw new \Exception("Where value should be an array.(options)");
         }
 
         return $this;
@@ -156,14 +155,15 @@ class Mongo
     public function where_in(?string $field, $in = array())
     {
         if (empty($field)) {
-            show_error("Mongo field is require to perform where in query.", 500);
+            throw new \CodeIgniter\Router\Exceptions\RedirectException($route, 500);
+            throw new \Exception("Mongo field is require to perform where in query.", 500);
         }
         if (is_array($in) && count($in) > 0) {
             $this->_w($field);
             $this->wheres[$field]['$in'] = $in;
             return ($this);
         } else {
-            log_message('warning', "where_in in value should be an array.");
+            throw new \Exception("where_in in value should be an array.");
         }
     }
 
@@ -179,14 +179,14 @@ class Mongo
     public function where_in_all(?string $field, $in = array())
     {
         if (empty($field)) {
-            show_error("Mongo field is require to perform where all in query.", 500);
+            throw new \Exception("Mongo field is require to perform where all in query.", 500);
         }
         if (is_array($in) && count($in) > 0) {
             $this->_w($field);
             $this->wheres[$field]['$all'] = $in;
             return ($this);
         } else {
-            log_message('warning', "where_in_all in value should be an array.");
+            throw new \Exception("where_in_all in value should be an array.");
         }
     }
 
@@ -202,14 +202,14 @@ class Mongo
     public function where_not_in(?string $field, $in = array())
     {
         if (empty($field)) {
-            show_error("Mongo field is require to perform where not in query.", 500);
+            throw new \Exception("Mongo field is require to perform where not in query.", 500);
         }
         if (is_array($in) && count($in) > 0) {
             $this->_w($field);
             $this->wheres[$field]['$nin'] = $in;
             return ($this);
         } else {
-            log_message('warning', "where_not_in in value should be an array.", 500);
+            throw new \Exception("where_not_in in value should be an array.", 500);
         }
     }
 
@@ -225,10 +225,10 @@ class Mongo
     public function where_gt(?string $field, $x)
     {
         if (!isset($field)) {
-            log_message('warning', "Mongo field is require to perform greater then query.");
+            throw new \Exception("Mongo field is require to perform greater then query.");
         }
         if (!isset($x)) {
-            log_message('warning', "Mongo field's value is require to perform greater then query.");
+            throw new \Exception("Mongo field's value is require to perform greater then query.");
         }
         $this->_w($field);
         $this->wheres[$field]['$gt'] = $x;
@@ -247,10 +247,10 @@ class Mongo
     public function where_gte(?string $field, $x)
     {
         if (!isset($field)) {
-            log_message('warning', "Mongo field is require to perform greater then or equal query.");
+            throw new \Exception("Mongo field is require to perform greater then or equal query.");
         }
         if (!isset($x)) {
-            show_error('warning', "Mongo field's value is require to perform greater then or equal query.");
+            throw new \Exception('warning', "Mongo field's value is require to perform greater then or equal query.");
         }
         $this->_w($field);
         $this->wheres[$field]['$gte'] = $x;
@@ -269,10 +269,10 @@ class Mongo
     public function where_lt(?string $field, $x)
     {
         if (!isset($field)) {
-            log_message('warning', "Mongo field is require to perform less then query.");
+            throw new \Exception("Mongo field is require to perform less then query.");
         }
         if (!isset($x)) {
-            log_message('warning', "Mongo field's value is require to perform less then query.");
+            throw new \Exception("Mongo field's value is require to perform less then query.");
         }
         $this->_w($field);
         $this->wheres[$field]['$lt'] = $x;
@@ -291,10 +291,10 @@ class Mongo
     public function where_lte(?string $field, $x)
     {
         if (!isset($field)) {
-            log_message('watning', "Mongo field is require to perform less then or equal to query.");
+            throw new \Exception("Mongo field is require to perform less then or equal to query.");
         }
         if (!isset($x)) {
-            log_message('warning', "Mongo field's value is require to perform less then or equal to query.");
+            throw new \Exception("Mongo field's value is require to perform less then or equal to query.");
         }
         $this->_w($field);
         $this->wheres[$field]['$lte'] = $x;
@@ -313,13 +313,13 @@ class Mongo
     public function where_between(?string $field, $x, $y)
     {
         if (!isset($field)) {
-            log_message('warning', "Mongo field is require to perform greater then or equal to query.");
+            throw new \Exception("Mongo field is require to perform greater then or equal to query.");
         }
         if (!isset($x)) {
-            log_message('warning', "Mongo field's start value is require to perform greater then or equal to query.");
+            throw new \Exception("Mongo field's start value is require to perform greater then or equal to query.");
         }
         if (!isset($y)) {
-            log_message('warning', "Mongo field's end value is require to perform greater then or equal to query.");
+            throw new \Exception("Mongo field's end value is require to perform greater then or equal to query.");
         }
         $this->_w($field);
         $this->wheres[$field]['$gte'] = $x;
@@ -339,13 +339,13 @@ class Mongo
     public function where_between_ne($field, $x, $y)
     {
         if (!isset($field)) {
-            log_message('warning', "Mongo field is require to perform between and but not equal to query.");
+            throw new \Exception("Mongo field is require to perform between and but not equal to query.");
         }
         if (!isset($x)) {
-            log_message('warning', "Mongo field's start value is require to perform between and but not equal to query.");
+            throw new \Exception("Mongo field's start value is require to perform between and but not equal to query.");
         }
         if (!isset($y)) {
-            log_message('warning', "Mongo field's end value is require to perform between and but not equal to query.");
+            throw new \Exception("Mongo field's end value is require to perform between and but not equal to query.");
         }
         $this->_w($field);
         $this->wheres[$field]['$gt'] = $x;
@@ -365,10 +365,10 @@ class Mongo
     public function where_ne($field, $x)
     {
         if (!isset($field)) {
-            log_message('warning', "Mongo field is require to perform Where not equal to query.");
+            throw new \Exception("Mongo field is require to perform Where not equal to query.");
         }
         if (!isset($x)) {
-            log_message('warning', "Mongo field's value is require to perform Where not equal to query.");
+            throw new \Exception("Mongo field's value is require to perform Where not equal to query.");
         }
         $this->_w($field);
         $this->wheres[$field]['$ne'] = $x;
@@ -407,10 +407,10 @@ class Mongo
     public function like(?string $field, $value = "", $flags = "i", $enable_start_wildcard = TRUE, $enable_end_wildcard = TRUE)
     {
         if (empty($field)) {
-            log_message('warning', "Mongo field is require to perform like query.");
+            throw new \Exception("Mongo field is require to perform like query.");
         }
         if (empty($value)) {
-            log_message('warning', "Mongo field's value is require to like query.");
+            throw new \Exception("Mongo field's value is require to like query.");
         }
         $field = (string)trim($field);
         $this->_w($field);
@@ -509,8 +509,8 @@ class Mongo
      *
      * Pushes values into a field (field must be an array)
      *
-     * @usage: $this->m->where(array('blog_id'=>123))->push('comments', array('text'=>'Hello world'))->update('blog_posts');
-     * @usage: $this->m->where(array('blog_id'=>123))->push(array('comments' => array('text'=>'Hello world')), 'viewed_by' => array('Alex')->update('blog_posts');
+     * @usage: $this->m->where(array('blog_id'=>123))->push('comments', array('text'=>'Hello world'))->update('blog_posts');v
+     * @usage: $this->m->where(array('blog_id'=>123))->push(array('comments' => array('text'=>'Hello world')), 'iewed_by' => array('Alex')->update('blog_posts');
      */
     public function push($fields, $value = array())
     {
@@ -680,10 +680,10 @@ class Mongo
     public function distinct(?string $collection, ?string $field)
     {
         if (empty($collection)) {
-            show_error("No Mongo collection selected for update", 500);
+            throw new \Exception("No Mongo collection selected for update", 500);
         }
         if (empty($field)) {
-            show_error("Need Collection field information for performing distinct query", 500);
+            throw new \Exception("Need Collection field information for performing distinct query", 500);
         }
         try {
             $documents = $this->mongoConnectionInfos->db->{$this->mongoConnectionInfos->prefix . $collection}->distinct($field, $this->wheres);
@@ -695,13 +695,24 @@ class Mongo
             }
         } catch (MongoCursorException $e) {
             if (isset($this->debug) == TRUE && $this->debug == TRUE) {
-                show_error("MongoDB Distinct Query Failed: {$e->getMessage()}", 500);
+                throw new \Exception("MongoDB Distinct Query Failed: {$e->getMessage()}", 500);
             } else {
-                show_error("MongoDB failed", 500);
+                throw new \Exception("MongoDB failed", 500);
             }
         }
     }
 
+    /**
+     * --------------------------------------------------------------------------------
+     * // Order by
+     * --------------------------------------------------------------------------------
+     *
+     * Sort the documents based on the parameters passed. To set values to descending order,
+     * you must pass values of either -1, FALSE, 'desc', or 'DESC', else they will be
+     * set to 1 (ASC).
+     *
+     * @usage : $this->m->order_by(array('foo' => 'ASC'))->get('foobar');
+     */
     public function order_by($fields = array())
     {
         foreach ($fields as $col => $val) {
@@ -763,7 +774,7 @@ class Mongo
         $this->wheres = array();
         $this->offset = 0;
         $this->sorts = array();
-        $this->options = array();
+        $this->options = array(); // ?? düşünülecek
     }
 
     /**
@@ -807,7 +818,7 @@ class Mongo
      * @param array $insertArray
      * @return : last insert id
      */
-    public function insert($collection, $insertArray = [])
+    public function insertMany($collection, $insertArray = [])
     {
         return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->insertMany($insertArray)->isAcknowledged();
     }
@@ -817,7 +828,7 @@ class Mongo
      * be an associative array with the field as the key and the value as the search
      * criteria.
      *
-     * @usage $m->find(array('foo'=>'bar'))->get('foobar);
+     * @usage $this->m->find(array('foo'=>'bar'))->get('foobar);
      */
     public function findOne($collection)
     {
@@ -825,7 +836,7 @@ class Mongo
     }
 
     /**
-     * @usage $collection->find(
+     * @usage $this->m->find(
      * [
      * 'cuisine' => 'Italian',
      * 'borough' => 'Manhattan',
@@ -856,7 +867,7 @@ class Mongo
     }
 
     /**
-     * @usage $collection->aggregate([
+     * @usage $m->aggregate([
      * ['$group' => ['_id' => '$state', 'count' => ['$sum' => 1]]],
      * ['$sort' => ['count' => -1]],
      * ['$limit' => 5],
@@ -879,7 +890,7 @@ class Mongo
     }
 
     /**
-     * @usage $collection->updateOne(
+     * @usage $m->updateOne(
      * ['name' => 'Bob'],
      * ['$set' => ['state' => 'ny']],
      * ['upsert' => true]
@@ -904,5 +915,192 @@ class Mongo
     {
         return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->deleteMany($this->wheres, $this->options)->isAcknowledged();
     }
-}
 
+    /**
+     * --------------------------------------------------------------------------------
+     * //! Drop collection
+     * --------------------------------------------------------------------------------
+     *
+     * Drop a Mongo collection
+     * @usage: $this->m->drop_collection('bar');
+     */
+    public function drop_collection($col = '')
+    {
+        if (empty($col)) {
+            throw new \Exception('Failed to drop MongoDB collection because collection name is empty', 500);
+        }
+
+        $command = array();
+        $command['drop'] = $col;
+
+        return $this->command($command);
+    }
+
+    /**
+     * --------------------------------------------------------------------------------
+     * //! Drop database
+     * --------------------------------------------------------------------------------
+     *
+     * Drop a Mongo database
+     * @usage: $this->m->drop_db("foobar");
+     */
+    public function drop_db($database = '')
+    {
+        if (empty($database)) {
+            throw new \Exception('Failed to drop MongoDB database because name is empty', 500);
+        }
+
+        $command = array();
+        $command['dropDatabase'] = 1;
+
+        return $this->m->dropDatabase($database,$command);
+    }
+
+    /**
+     * --------------------------------------------------------------------------------
+     * Remove index
+     * --------------------------------------------------------------------------------
+     *
+     * Remove an index of the keys in a collection. To set values to descending order,
+     * you must pass values of either -1, FALSE, 'desc', or 'DESC', else they will be
+     * set to 1 (ASC).
+     *
+     * @usage : $this->m->remove_index($collection, 'index_1');
+     */
+    public function remove_index($collection = "", $name = "")
+    {
+        if (empty($collection)) {
+            throw new \Exception("No Mongo collection specified to remove index from", 500);
+        }
+
+        if (empty($keys)) {
+            throw new \Exception("Index could not be removed from MongoDB Collection because no index name were specified", 500);
+        }
+
+        $command = array();
+        $command['dropIndexes'] = $collection;
+        $command['index'] = $name;
+
+        return $this->command($command);
+    }
+
+    /**
+     * --------------------------------------------------------------------------------
+     * //! Add indexes
+     * --------------------------------------------------------------------------------
+     *
+     * Ensure an index of the keys in a collection with optional parameters. To set values to descending order,
+     * you must pass values of either -1, FALSE, 'desc', or 'DESC', else they will be
+     * set to 1 (ASC).
+     *
+     * @usage : $this->m->add_index($collection, array('first_name' => 'ASC', 'last_name' => -1), array('unique' => TRUE));
+     */
+    public function add_index($collection = "", $keys = array(), $options = array())
+    {
+        if (empty($collection)) {
+            throw new \Exception("No Mongo collection specified to add index to", 500);
+        }
+
+        if (empty($keys) || !is_array($keys)) {
+            throw new \Exception("Index could not be created to MongoDB Collection because no keys were specified", 500);
+        }
+
+        foreach ($keys as $col => $val) {
+            if ($val == -1 || $val === FALSE || strtolower($val) == 'desc') {
+                $keys[$col] = -1;
+            } else {
+                $keys[$col] = 1;
+            }
+        }
+        $command = array();
+        $command['createIndexes'] = $collection;
+        $command['indexes'] = array($keys);
+
+        return $this->command($command);
+    }
+
+    /**
+     * --------------------------------------------------------------------------------
+     * // Command
+     * --------------------------------------------------------------------------------
+     * TODO: başka yöntem var mı bakılacak
+     * Runs a MongoDB command
+     *
+     * @param string : Collection name, array $query The command query
+     * @usage : $this->m->command($collection, array('geoNear'=>'buildings', 'near'=>array(53.228482, -0.547847), 'num' => 10, 'nearSphere'=>true));
+     * @access public
+     * @return object or array
+     */
+
+    public function command($command = array())
+    {
+        try {
+            $cursor = $this->m->executeCommand($this->mongoConnectionInfos[$this->dbInfo]->db, new MongoDB\Driver\Command($command));
+            // Clear
+            $this->_clear();
+            $returns = array();
+
+            if ($cursor instanceof MongoDB\Driver\Cursor) {
+                $it = new \IteratorIterator($cursor);
+                $it->rewind();
+
+                while ($doc = (array)$it->current()) {
+                    if ($this->return_as == 'object') {
+                        $returns[] = (object)$this->convert_document_id($doc);
+                    } else {
+                        $returns[] = (array)$this->convert_document_id($doc);
+                    }
+                    $it->next();
+                }
+            }
+
+            if ($this->return_as == 'object') {
+                return (object)$returns;
+            } else {
+                return $returns;
+            }
+        } catch (MongoDB\Driver\Exception $e) {
+            if (isset($this->debug) == TRUE && $this->debug == TRUE) {
+                throw new \Exception("MongoDB query failed: {$e->getMessage()}", 500);
+            } else {
+                throw new \Exception("MongoDB query failed.", 500);
+            }
+        }
+    }
+
+    /**
+     * --------------------------------------------------------------------------------
+     * // Limit results
+     * --------------------------------------------------------------------------------
+     *
+     * Limit the result set to $x number of documents
+     *
+     * @usage : $this->m->limit($x);
+     */
+    public function limit($x = 99999)
+    {
+        if ($x !== NULL && is_numeric($x) && $x >= 1) {
+            $this->limit = (int)$x;
+        }
+        return ($this);
+    }
+
+    /**
+     * --------------------------------------------------------------------------------
+     * Mongo Date
+     * --------------------------------------------------------------------------------
+     *
+     * Create new MongoDate object from current time or pass timestamp to create
+     * mongodate.
+     *
+     * @usage : $this->mongo_db->date($timestamp);
+     */
+    public function date($stamp = FALSE)
+    {
+        if ($stamp == FALSE) {
+            return new MongoDB\BSON\UTCDateTime();
+        } else {
+            return new MongoDB\BSON\UTCDateTime($stamp);
+        }
+    }
+}

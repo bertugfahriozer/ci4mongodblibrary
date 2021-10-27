@@ -20,7 +20,7 @@ class CommonModel extends Model
 
     public function create(string $collection, array $credentials)
     {
-        return $this->m->insert($collection, $credentials);
+        return $this->m->insertMany($collection, $credentials);
     }
 
     public function createOne(string $collection, array $credentials)
