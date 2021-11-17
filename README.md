@@ -1,5 +1,10 @@
 # Codeigniter 4 MongoDB Kitaplığı ve Ortak Model
 
+##Sistem Gereksinimleri
+
+- PHP 7.3 veya 8.0^
+- MongoDB PHP Driver 1.8^
+
 ## Kurulum
 
 Mongo Driver ve Composer'a sisteminize kurmuş olmalısınız. Kurulum için şu bağlantıları izleyin:
@@ -13,6 +18,8 @@ Bir config dosyası oluşturmalısınız. Dosya oluşturduğunuzda, php etiketi 
 
 Uzak Bağlantı için srv değişkenine yorum satırındakini veri kullanılabilir veya boş bırakılabilir. authMechanism değişkeni bağlantı yapılırken gereken güvenlik protokolünü belirtmeniz için oluşturulmuştur.
 
+Eğer isterseniz başka bir veritabanına bağlanmak için model içinde $dbVar=new Mongo('dbName'). bu sayede tek bir Ci4 uygulaması içinde birden çok veritabanına müdehale edebilirsiniz.
+
 <pre>
 < ? php namespace App\Config;
 
@@ -20,15 +27,30 @@ use CodeIgniter\Config\BaseConfig;
 
 class MongoConfig extends BaseConfig
 {
-    public $db = ''; //your database
-    public $hostname = "";//127.0.0.1 if you use remote server you should change host address
-    public $userName = "";
-    public $password = "";
-    public $prefix = '';
-    public $port = "";//27017 if you use different port you should change port address
-    public $srv='';//mongodb+srv
-    //SCRAM-SHA-256 - SCRAM-SHA-1
-    public $authMechanism="SCRAM-SHA-1";
+    public $dbInfo = [];
+
+    public function __construct()
+    {
+        $this->dbInfo = [
+            'default' => (object)[
+                'db' => '', //your database
+                'hostname' => "",//127.0.0.1 if you use remote server you should change host address
+                'userName' => "",
+                'password' => "",
+                'prefix' => '',
+                'port' => "",//27017 if you use different port you should change port address
+                'srv' => 'mongodb',//mongodb+srv
+                //SCRAM-SHA-256 - SCRAM-SHA-1
+                'authMechanism' => "SCRAM-SHA-1",
+                'db_debug' => TRUE,
+                'write_concerns' => (int)1,
+                'journal' => TRUE,
+                'read_preference' => 'primary',
+                'read_concern' => 'local', //'local', 'majority' or 'linearizable'
+                'ca_file'=>[]//['ca_file' => '/usr/local/etc/openssl/cert.pem']
+            ]
+        ];
+    }
 }
 </pre>
 
@@ -43,6 +65,11 @@ manuel kurulum istiyorsanız aşağıdaki adımları takip edebilirsiniz.
 
 # Codeigniter 4 MongoDB Library & Common Model
 
+##System Requirements
+
+- PHP 7.3 veya 8.0^
+- MongoDB PHP Driver 1.8^
+
 ## Installation
 You must have Mongo Driver and Composer. Follow these links for installation:
 
@@ -55,6 +82,7 @@ You must create a config file. When you create file, delete spaces for php tag. 
 
 For Remote Connection, the data in the comment line can be used or left blank in the srv variable. The authMechanism variable is created to specify the required security protocol when connecting.
 
+If you want to connect to another database, $dbVar=new Mongo('dbName') in the model. In this way, you can intervene in multiple databases within a single Ci4 application.
 <pre>
 < ? php namespace App\Config;
 
@@ -62,15 +90,30 @@ use CodeIgniter\Config\BaseConfig;
 
 class MongoConfig extends BaseConfig
 {
-    public $db = ''; //your database
-    public $hostname = "";//127.0.0.1 if you use remote server you should change host address
-    public $userName = "";
-    public $password = "";
-    public $prefix = '';
-    public $port = "";//27017 if you use different port you should change port address
-    public $srv='';//mongodb+srv
-    //SCRAM-SHA-256 - SCRAM-SHA-1
-    public $authMechanism="SCRAM-SHA-1";
+    public $dbInfo = [];
+
+    public function __construct()
+    {
+        $this->dbInfo = [
+            'default' => (object)[
+                'db' => '', //your database
+                'hostname' => "",//127.0.0.1 if you use remote server you should change host address
+                'userName' => "",
+                'password' => "",
+                'prefix' => '',
+                'port' => "",//27017 if you use different port you should change port address
+                'srv' => 'mongodb',//mongodb+srv
+                //SCRAM-SHA-256 - SCRAM-SHA-1
+                'authMechanism' => "SCRAM-SHA-1",
+                'db_debug' => TRUE,
+                'write_concerns' => (int)1,
+                'journal' => TRUE,
+                'read_preference' => 'primary',
+                'read_concern' => 'local', //'local', 'majority' or 'linearizable'
+                'ca_file'=>[]//['ca_file' => '/usr/local/etc/openssl/cert.pem']
+            ]
+        ];
+    }
 }
 </pre>
 
