@@ -22,16 +22,19 @@ class Mongo
         try {
             $this->mongoConnectionInfos = new MongoConfig();
             foreach ($this->mongoConnectionInfos->dbInfo as $key=>$dbInfo) {
-                if($key===$selectedDB)
-                $this->m = new client($this->mongoConnectionInfos->dbInfo[$key]->srv . "://{$this->mongoConnectionInfos->dbInfo[$key]->hostname}:{$this->mongoConnectionInfos->dbInfo[$key]->port}/{$this->mongoConnectionInfos->dbInfo[$key]->db}",
-                    [$this->mongoConnectionInfos->dbInfo[$key]->authMechanism,
-                        'username' => $this->mongoConnectionInfos->dbInfo[$key]->userName,
-                        'password' => $this->mongoConnectionInfos->dbInfo[$key]->password,
-                        'journal' => $this->mongoConnectionInfos->dbInfo[$key]->journal,
-                        'w' => $this->mongoConnectionInfos->dbInfo[$key]->write_concerns,
-                        'readConcern' => $this->mongoConnectionInfos->dbInfo[$key]->read_concern,
-                        'readPreference' => $this->mongoConnectionInfos->dbInfo[$key]->read_preference,
-                    ], $this->mongoConnectionInfos->dbInfo[$key]->ca_file);
+                if($key===$selectedDB) {
+                    $this->m = new client($this->mongoConnectionInfos->dbInfo[$key]->srv . "://{$this->mongoConnectionInfos->dbInfo[$key]->hostname}:{$this->mongoConnectionInfos->dbInfo[$key]->port}/{$this->mongoConnectionInfos->dbInfo[$key]->db}",
+                        [$this->mongoConnectionInfos->dbInfo[$key]->authMechanism,
+                            'username' => $this->mongoConnectionInfos->dbInfo[$key]->userName,
+                            'password' => $this->mongoConnectionInfos->dbInfo[$key]->password,
+                            'journal' => $this->mongoConnectionInfos->dbInfo[$key]->journal,
+                            'w' => $this->mongoConnectionInfos->dbInfo[$key]->write_concerns,
+                            'readConcern' => $this->mongoConnectionInfos->dbInfo[$key]->read_concern,
+                            'readPreference' => $this->mongoConnectionInfos->dbInfo[$key]->read_preference,
+                        ], $this->mongoConnectionInfos->dbInfo[$key]->ca_file);
+                    $this->mongoConnectionInfos->db = $dbInfo->db;
+                    $this->mongoConnectionInfos->prefix = $dbInfo->prefix;
+                }
             }
         } catch (\CodeIgniter\UnknownFileException $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
