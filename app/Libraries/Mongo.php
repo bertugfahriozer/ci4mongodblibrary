@@ -138,6 +138,11 @@ class Mongo
         }
     }
 
+    /**
+     * @param array $options
+     * @return $this
+     * @throws \Exception
+     */
     public function options($options = array())
     {
         $ops = [];
@@ -156,6 +161,12 @@ class Mongo
         return $this;
     }
 
+    /**
+     * @param string|null $field
+     * @param array $in
+     * @return Mongo
+     * @throws \Exception
+     */
     public function where_in(?string $field, $in = array())
     {
         if (empty($field)) {
@@ -809,6 +820,11 @@ class Mongo
         }
     }
 
+    /**
+     * @param $collection
+     * @param array $insertArray
+     * @return mixed
+     */
     public function insertOne($collection, $insertArray = [])
     {
         return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->insertOne($insertArray)->getInsertedId();
@@ -860,11 +876,20 @@ class Mongo
         return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->find($this->wheres, $this->options);
     }
 
+    /**
+     * @param $collection
+     * @param array $update
+     * @return mixed
+     */
     public function findOneAndUpdate($collection, $update = [])
     {
         return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->findOneAndUpdate($this->wheres, ['$set' => $update], $this->options);
     }
 
+    /**
+     * @param $collection
+     * @return mixed
+     */
     public function findOneAndDelete($collection)
     {
         return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->findOneAndDelete($this->wheres, $this->options);
@@ -905,171 +930,31 @@ class Mongo
         return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->updateOne($this->wheres, $this->updates, $this->options)->isAcknowledged();
     }
 
+    /**
+     * @param $collection
+     * @return mixed
+     */
     public function updateMany($collection)
     {
         return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->updateMany($this->where, $this->updates, $this->options)->isAcknowledged();
     }
 
+    /**
+     * @param $collection
+     * @return mixed
+     */
     public function deleteOne($collection)
     {
         return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->deleteOne($this->wheres, $this->options)->isAcknowledged();
     }
 
+    /**
+     * @param $collection
+     * @return mixed
+     */
     public function deleteMany($collection)
     {
         return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->deleteMany($this->wheres, $this->options)->isAcknowledged();
-    }
-
-    /**
-     * --------------------------------------------------------------------------------
-     * //! Drop collection
-     * --------------------------------------------------------------------------------
-     *
-     * Drop a Mongo collection
-     * @usage: $this->m->drop_collection('bar');
-     */
-    public function drop_collection($col = '')
-    {
-        if (empty($col)) {
-            throw new \Exception('Failed to drop MongoDB collection because collection name is empty', 500);
-        }
-
-        $command = array();
-        $command['drop'] = $col;
-
-        return $this->command($command);
-    }
-
-    /**
-     * --------------------------------------------------------------------------------
-     * //! Drop database
-     * --------------------------------------------------------------------------------
-     *
-     * Drop a Mongo database
-     * @usage: $this->m->drop_db("foobar");
-     */
-    public function drop_db($database = '')
-    {
-        if (empty($database)) {
-            throw new \Exception('Failed to drop MongoDB database because name is empty', 500);
-        }
-
-        $command = array();
-        $command['dropDatabase'] = 1;
-
-        return $this->m->dropDatabase($database,$command);
-    }
-
-    /**
-     * --------------------------------------------------------------------------------
-     * Remove index
-     * --------------------------------------------------------------------------------
-     *
-     * Remove an index of the keys in a collection. To set values to descending order,
-     * you must pass values of either -1, FALSE, 'desc', or 'DESC', else they will be
-     * set to 1 (ASC).
-     *
-     * @usage : $this->m->remove_index($collection, 'index_1');
-     */
-    public function remove_index($collection = "", $name = "")
-    {
-        if (empty($collection)) {
-            throw new \Exception("No Mongo collection specified to remove index from", 500);
-        }
-
-        if (empty($keys)) {
-            throw new \Exception("Index could not be removed from MongoDB Collection because no index name were specified", 500);
-        }
-
-        $command = array();
-        $command['dropIndexes'] = $collection;
-        $command['index'] = $name;
-
-        return $this->command($command);
-    }
-
-    /**
-     * --------------------------------------------------------------------------------
-     * //! Add indexes
-     * --------------------------------------------------------------------------------
-     *
-     * Ensure an index of the keys in a collection with optional parameters. To set values to descending order,
-     * you must pass values of either -1, FALSE, 'desc', or 'DESC', else they will be
-     * set to 1 (ASC).
-     *
-     * @usage : $this->m->add_index($collection, array('first_name' => 'ASC', 'last_name' => -1), array('unique' => TRUE));
-     */
-    public function add_index($collection = "", $keys = array(), $options = array())
-    {
-        if (empty($collection)) {
-            throw new \Exception("No Mongo collection specified to add index to", 500);
-        }
-
-        if (empty($keys) || !is_array($keys)) {
-            throw new \Exception("Index could not be created to MongoDB Collection because no keys were specified", 500);
-        }
-
-        foreach ($keys as $col => $val) {
-            if ($val == -1 || $val === FALSE || strtolower($val) == 'desc') {
-                $keys[$col] = -1;
-            } else {
-                $keys[$col] = 1;
-            }
-        }
-        $command = array();
-        $command['createIndexes'] = $collection;
-        $command['indexes'] = array($keys);
-
-        return $this->command($command);
-    }
-
-    /**
-     * --------------------------------------------------------------------------------
-     * // Command
-     * --------------------------------------------------------------------------------
-     * TODO: başka yöntem var mı bakılacak
-     * Runs a MongoDB command
-     *
-     * @param string : Collection name, array $query The command query
-     * @usage : $this->m->command($collection, array('geoNear'=>'buildings', 'near'=>array(53.228482, -0.547847), 'num' => 10, 'nearSphere'=>true));
-     * @access public
-     * @return object or array
-     */
-
-    public function command($command = array())
-    {
-        try {
-            $cursor = $this->m->executeCommand($this->mongoConnectionInfos[$this->dbInfo]->db, new MongoDB\Driver\Command($command));
-            // Clear
-            $this->_clear();
-            $returns = array();
-
-            if ($cursor instanceof MongoDB\Driver\Cursor) {
-                $it = new \IteratorIterator($cursor);
-                $it->rewind();
-
-                while ($doc = (array)$it->current()) {
-                    if ($this->return_as == 'object') {
-                        $returns[] = (object)$this->convert_document_id($doc);
-                    } else {
-                        $returns[] = (array)$this->convert_document_id($doc);
-                    }
-                    $it->next();
-                }
-            }
-
-            if ($this->return_as == 'object') {
-                return (object)$returns;
-            } else {
-                return $returns;
-            }
-        } catch (MongoDB\Driver\Exception $e) {
-            if (isset($this->debug) == TRUE && $this->debug == TRUE) {
-                throw new \Exception("MongoDB query failed: {$e->getMessage()}", 500);
-            } else {
-                throw new \Exception("MongoDB query failed.", 500);
-            }
-        }
     }
 
     /**
