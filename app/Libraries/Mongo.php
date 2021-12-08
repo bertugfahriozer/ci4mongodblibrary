@@ -936,7 +936,7 @@ class Mongo
      */
     public function updateMany($collection)
     {
-        return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->updateMany($this->where, $this->updates, $this->options)->isAcknowledged();
+        return $this->m->selectCollection($this->mongoConnectionInfos->db, $this->mongoConnectionInfos->prefix . $collection)->updateMany($this->wheres, $this->updates, $this->options)->isAcknowledged();
     }
 
     /**
