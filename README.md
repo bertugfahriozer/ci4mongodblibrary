@@ -56,7 +56,17 @@ class MongoConfig extends BaseConfig
 
 <code>composer require bertugfahriozer/ci4mongodblibrary</code>
 
-manuel kurulum istiyorsanız aşağıdaki adımları takip edebilirsiniz.
+Eğer Composer ile yükledikten sonra direkt devam etmek istiyorsanız namespace düzeni şu şekilde :
+
+<code>
+use ci4mongodblibrary\Models\CommonModel;
+
+use ci4mongodblibrary\Libraries\Mongo;
+</code>
+
+<hr>
+
+Manuel kurulum istiyorsanız aşağıdaki adımları takip edebilirsiniz.
 
 **Codeigniter 4 projenize dosyaları taşıyabilirsiniz ve namespace değiştirmeniz gerekir =><br><br>app/Libraries/Mongo.php,<br>app/Config/MongoConfig.php,<br>app/Models/CommonModel.php.**
 
@@ -118,6 +128,16 @@ class MongoConfig extends BaseConfig
 </pre>
 
 <code>composer require bertugfahriozer/ci4mongodblibrary</code>
+
+If you want to continue directly after installing with Composer, the namespace layout is as follows:
+
+<code>
+use ci4mongodblibrary\Models\CommonModel;
+
+use ci4mongodblibrary\Libraries\Mongo;
+</code>
+
+<hr>
 
 if do you want manual install you can follow these steps.
 
