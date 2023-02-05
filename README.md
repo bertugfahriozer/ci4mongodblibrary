@@ -20,8 +20,8 @@ Uzak Bağlantı için srv değişkenine yorum satırındakini veri kullanılabil
 
 Eğer isterseniz başka bir veritabanına bağlanmak için model içinde $dbVar=new Mongo('dbName'). bu sayede tek bir Ci4 uygulaması içinde birden çok veritabanına müdehale edebilirsiniz.
 
-<pre>
-< ? php namespace App\Config;
+``` php
+<?php namespace App\Config;
 
 use CodeIgniter\Config\BaseConfig;
 
@@ -52,7 +52,7 @@ class MongoConfig extends BaseConfig
         ];
     }
 }
-</pre>
+```
 
 <code>composer require bertugfahriozer/ci4mongodblibrary</code>
 
@@ -93,8 +93,8 @@ You must create a config file. When you create file, delete spaces for php tag. 
 For Remote Connection, the data in the comment line can be used or left blank in the srv variable. The authMechanism variable is created to specify the required security protocol when connecting.
 
 If you want to connect to another database, $dbVar=new Mongo('dbName') in the model. In this way, you can intervene in multiple databases within a single Ci4 application.
-<pre>
-< ? php namespace App\Config;
+``` php
+<?php namespace App\Config;
 
 use CodeIgniter\Config\BaseConfig;
 
@@ -125,7 +125,7 @@ class MongoConfig extends BaseConfig
         ];
     }
 }
-</pre>
+```
 
 <code>composer require bertugfahriozer/ci4mongodblibrary</code>
 
